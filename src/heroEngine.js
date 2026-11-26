@@ -59,13 +59,14 @@ export function startHero({ list = F, stage, tabsEl, ul, prevBtn, nextBtn, isPau
       b.style.backgroundImage = `url("${String(f.image).replace(/"/g, '%22')}")`;
       L.bottle.appendChild(b);
     }
-    // Products added in the admin can give one fruit picture; it floats in the same kind of spots.
-    if (!f.items && f.fruit) {
-      for (const [x, y, w, rot, mir, lay] of GENERIC_PIECES) {
+    // Products added in the admin can give up to 4 fruit pictures; they take turns in the same kind of spots.
+    if (!f.items && f.fruits && f.fruits.length) {
+      for (const [k, [x, y, w, rot, mir, lay]] of GENERIC_PIECES.entries()) {
+        const fruit = f.fruits[k % f.fruits.length];
         const o = document.createElement('div'); o.className = 'piece' + (mir ? ' mir' : '');
         o.style.left = U(x); o.style.top = U(y); o.style.width = U(w); o.style.height = U(w);
         const inner = document.createElement('div'); inner.className = 'pi pi-img';
-        inner.style.backgroundImage = `url("${String(f.fruit).replace(/"/g, '%22')}")`;
+        inner.style.backgroundImage = `url("${String(fruit).replace(/"/g, '%22')}")`;
         inner.style.setProperty('--r', rot + 'deg');
         inner.style.setProperty('--d', rand(3.2, 5).toFixed(2) + 's');
         inner.style.setProperty('--dl', (-rand(0, 4)).toFixed(2) + 's');

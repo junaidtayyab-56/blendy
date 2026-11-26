@@ -56,8 +56,9 @@ export default function Products() {
 }
 
 const HERO_ART = ['berry', 'kiwi', 'banana', 'strawberry'];
+const MAX_FRUITS = 4;
 
-const EMPTY = { name: '', slug: '', description: '', ingredients: '', category_id: '', price: '', compare: '', stock: '0', sku: '', size_ml: '', bg_color: '#C2B0DC', image_url: '', featured: false, show_on_home: false, hero_fruit_url: '', active: true, sort_order: '0' };
+const EMPTY = { name: '', slug: '', description: '', ingredients: '', category_id: '', price: '', compare: '', stock: '0', sku: '', size_ml: '', bg_color: '#C2B0DC', image_url: '', featured: false, show_on_home: false, hero_fruits: [], active: true, sort_order: '0' };
 
 export function ProductForm() {
   const { id } = useParams();
@@ -79,7 +80,7 @@ export function ProductForm() {
         setForm({
           ...data, category_id: data.category_id || '', price: centsToInput(data.price_cents), compare: centsToInput(data.compare_at_price_cents),
           stock: String(data.stock), size_ml: data.size_ml ?? '', sku: data.sku || '', description: data.description || '', ingredients: data.ingredients || '',
-          bg_color: data.bg_color || '#C2B0DC', image_url: data.image_url || '', hero_fruit_url: data.hero_fruit_url || '', sort_order: String(data.sort_order ?? 0),
+          bg_color: data.bg_color || '#C2B0DC', image_url: data.image_url || '', hero_fruits: (data.hero_fruits && data.hero_fruits.length ? data.hero_fruits : (data.hero_fruit_url ? [data.hero_fruit_url] : [])), sort_order: String(data.sort_order ?? 0),
         });
       });
     }
@@ -103,7 +104,8 @@ export function ProductForm() {
     setUploading(false);
     if (error) { flash(error.message); return; }
     const { data } = supabase.storage.from('product-images').getPublicUrl(path);
-    setForm((f) => ({ ...f, [field]: data.publicUrl }));
+    setForm((f) => (field === 'hero_fruits' ? { ...f, hero_fruits: [...f.hero_fruits, data.publicUrl].slice(0, MAX_FRUITS) } : { ...f, [field]: data.publicUrl }));
+    e.target.value = '';
     flash('Image uploaded. Save the product to keep it.');
   }
 
@@ -122,7 +124,7 @@ export function ProductForm() {
       name: form.name.trim(), slug: slugify(form.slug), description: form.description.trim() || null, ingredients: form.ingredients.trim() || null,
       category_id: form.category_id || null, price_cents: price, compare_at_price_cents: compare, stock, sku: form.sku.trim() || null,
       size_ml: form.size_ml === '' ? null : parseInt(form.size_ml, 10), bg_color: form.bg_color || null, image_url: form.image_url.trim() || null,
-      featured: form.featured, show_on_home: form.show_on_home, hero_fruit_url: form.hero_fruit_url.trim() || null, active: form.active, sort_order: parseInt(form.sort_order, 10) || 0,
+      featured: form.featured, show_on_home: form.show_on_home, hero_fruits: form.hero_fruits.slice(0, MAX_FRUITS), hero_fruit_url: form.hero_fruits[0] || null, active: form.active, sort_order: parseInt(form.sort_order, 10) || 0,
     };
     setBusy(true);
     const { data, error } = isNew ? await supabase.from('products').insert(row).select('id').single() : await supabase.from('products').update(row).eq('id', id).select('id').single();
@@ -192,14 +194,24 @@ export function ProductForm() {
           </section>
           {!HERO_ART.includes(form.slug) && (
             <section className="bx-card">
-              <h2>Homepage fruit image</h2>
-              <p className="b-muted bx-hint">Optional. A fruit picture that floats around the bottle in the homepage slider, like the original smoothies. A PNG with a transparent background looks best.</p>
-              {form.hero_fruit_url && <div className="bx-fruit-prev" style={{ background: form.bg_color || '#C2B0DC' }}><img src={form.hero_fruit_url} alt="" /></div>}
-              <label className="b-btn b-btn-ghost b-btn-block bx-upload">
-                {uploading ? 'Uploading…' : form.hero_fruit_url ? 'Change fruit image' : 'Upload fruit image'}
-                <input type="file" accept="image/png,image/webp,image/gif,image/avif,image/jpeg" onChange={(e) => upload(e, 'hero_fruit_url')} disabled={uploading} hidden />
-              </label>
-              {form.hero_fruit_url && <button type="button" className="bx-link-btn" onClick={() => setForm((f) => ({ ...f, hero_fruit_url: '' }))}>Remove fruit image</button>}
+              <h2>Homepage fruit pictures</h2>
+              <p className="b-muted bx-hint">Optional. Up to {MAX_FRUITS} different fruit pictures that float around the bottle in the homepage slider, like the original smoothies. PNGs with a transparent background look best.</p>
+              {form.hero_fruits.length > 0 && (
+                <div className="bx-fruits" style={{ background: form.bg_color || '#C2B0DC' }}>
+                  {form.hero_fruits.map((url, i) => (
+                    <div key={url + i} className="bx-fruit">
+                      <img src={url} alt={`Fruit picture ${i + 1}`} />
+                      <button type="button" aria-label={`Remove fruit picture ${i + 1}`} onClick={() => setForm((f) => ({ ...f, hero_fruits: f.hero_fruits.filter((_, j) => j !== i) }))}>×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {form.hero_fruits.length < MAX_FRUITS && (
+                <label className="b-btn b-btn-ghost b-btn-block bx-upload">
+                  {uploading ? 'Uploading…' : form.hero_fruits.length ? 'Add another fruit picture' : 'Upload fruit picture'}
+                  <input type="file" accept="image/png,image/webp,image/gif,image/avif,image/jpeg" onChange={(e) => upload(e, 'hero_fruits')} disabled={uploading} hidden />
+                </label>
+              )}
             </section>
           )}
           <section className="bx-card">
