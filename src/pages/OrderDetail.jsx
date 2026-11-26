@@ -20,7 +20,7 @@ export default function OrderDetail() {
   usePageTitle(placed ? 'Order confirmed' : 'Order');
 
   useEffect(() => {
-    supabase.from('orders').select('*, items:order_items(id, product_name, unit_price_cents, quantity)').eq('id', id).maybeSingle()
+    supabase.from('orders').select('*, items:order_items(id, product_name, unit_price_cents, quantity), cards:card_redemptions(id, amount_cents, restored_at, card:discount_cards(code))').eq('id', id).maybeSingle()
       .then(({ data, error }) => { if (error) console.error(error); setOrder(data || null); });
   }, [id]);
 
@@ -60,7 +60,18 @@ export default function OrderDetail() {
         </ul>
         <div className="b-sum-row"><span>Subtotal</span><span>{fmt(order.subtotal_cents || order.total_cents)}</span></div>
         <div className="b-sum-row"><span>Shipping</span><span>{order.shipping_cents ? fmt(order.shipping_cents) : 'Free'}</span></div>
-        <div className="b-sum-row b-sum-total"><span>Total</span><strong>{fmt(order.total_cents)}</strong></div>
+        {order.discount_cents > 0 && (
+          <>
+            <div className="b-sum-row b-sum-disc"><span>Discount cards</span><span>−{fmt(order.discount_cents)}</span></div>
+            {order.cards?.length > 0 && (
+              <div className="b-sum-codes">
+                {order.cards.map((r) => r.card?.code).filter(Boolean).join(', ')}
+                {order.status === 'cancelled' && order.cards.some((r) => r.restored_at) && ' · returned to your account'}
+              </div>
+            )}
+          </>
+        )}
+        <div className="b-sum-row b-sum-total"><span>{order.discount_cents > 0 ? 'Total to pay' : 'Total'}</span><strong>{fmt(order.total_cents)}</strong></div>
         {order.shipping_name && (
           <div className="b-addr">
             <h3>Delivering to</h3>

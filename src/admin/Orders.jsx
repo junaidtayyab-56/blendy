@@ -66,7 +66,7 @@ export function AdminOrder() {
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const { data, error } = await supabase.from('orders').select('*, items:order_items(id, product_id, product_name, unit_price_cents, quantity)').eq('id', id).maybeSingle();
+    const { data, error } = await supabase.from('orders').select('*, items:order_items(id, product_id, product_name, unit_price_cents, quantity), cards:card_redemptions(id, amount_cents, restored_at, card:discount_cards(id, code))').eq('id', id).maybeSingle();
     if (error) console.error(error);
     setOrder(data || null);
     if (data) { setStatus(data.status); setNotes(data.notes || ''); }
@@ -74,7 +74,7 @@ export function AdminOrder() {
   useEffect(() => { load(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function save() {
-    if (status === 'cancelled' && order.status !== 'cancelled' && !window.confirm('Cancel this order? Its items go back into stock, and a cancelled order cannot be reopened.')) return;
+    if (status === 'cancelled' && order.status !== 'cancelled' && !window.confirm(`Cancel this order? Its items go back into stock${order.discount_cents > 0 ? ', its discount cards go back to the customer' : ''}, and a cancelled order cannot be reopened.`)) return;
     setBusy(true);
     const { error } = await supabase.from('orders').update({ status, notes: notes.trim() || null }).eq('id', id);
     setBusy(false);
@@ -108,6 +108,9 @@ export function AdminOrder() {
             <tfoot>
               <tr><td colSpan={3}>Subtotal</td><td className="r">{fmt(order.subtotal_cents || order.total_cents)}</td></tr>
               <tr><td colSpan={3}>Shipping</td><td className="r">{fmt(order.shipping_cents)}</td></tr>
+              {order.discount_cents > 0 && (
+                <tr><td colSpan={3}>Discount cards{order.cards?.length ? ` (${order.cards.map((r) => r.card?.code).filter(Boolean).join(', ')}${order.cards.some((r) => r.restored_at) ? ', returned' : ''})` : ''}</td><td className="r">−{fmt(order.discount_cents)}</td></tr>
+              )}
               <tr className="bx-tot"><td colSpan={3}>Total (cash on delivery)</td><td className="r">{fmt(order.total_cents)}</td></tr>
             </tfoot>
           </table>
@@ -122,7 +125,8 @@ export function AdminOrder() {
             </label>
             <label className="b-field"><span>Internal notes</span><textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} /></label>
             <button type="button" className="b-btn b-btn-block" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save changes'}</button>
-            {locked && <p className="b-muted b-small">Cancelled orders are closed. Stock was returned.</p>}
+            {locked && <p className="b-muted b-small">Cancelled orders are closed. Stock{order.discount_cents > 0 ? ' and discount cards were' : ' was'} returned.</p>}
+            {!locked && <p className="b-muted b-small">Setting an order to delivered counts it as a completed order for discount card rewards.</p>}
           </section>
           <section className="bx-card">
             <h2>Customer</h2>
