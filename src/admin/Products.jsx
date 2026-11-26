@@ -10,6 +10,15 @@ export default function Products() {
   const [products, setProducts] = useState(null);
   const [q, setQ] = useState('');
   const { fmt } = useSettings();
+  const flash = useToast();
+
+  async function remove(p) {
+    if (!window.confirm(`Delete "${p.name}"? It will be removed from the store and from carts. Past orders keep their line items. This cannot be undone.\n\nTip: untick "Show in store" on the product instead if you only want to hide it.`)) return;
+    const { error } = await supabase.from('products').delete().eq('id', p.id);
+    if (error) { flash(error.message); return; }
+    setProducts((list) => list.filter((x) => x.id !== p.id));
+    flash('Product deleted');
+  }
 
   useEffect(() => {
     supabase.from('products').select('*, category:categories(name)').order('sort_order').order('name')
@@ -25,7 +34,7 @@ export default function Products() {
       <div className="bx-card bx-flush">
         {products === null ? <div className="bx-loading">Loading…</div> : shown.length === 0 ? <p className="bx-empty">No products yet.</p> : (
           <table className="bx-table bx-table-stack">
-            <thead><tr><th></th><th>Product</th><th>Category</th><th className="r">Price</th><th className="r">Stock</th><th>Status</th></tr></thead>
+            <thead><tr><th></th><th>Product</th><th>Category</th><th className="r">Price</th><th className="r">Stock</th><th>Status</th><th></th></tr></thead>
             <tbody>
               {shown.map((p) => (
                 <tr key={p.id}>
@@ -35,6 +44,7 @@ export default function Products() {
                   <td data-l="Price" className="r">{fmt(p.price_cents)}</td>
                   <td data-l="Stock" className={'r' + (p.stock === 0 ? ' b-out' : p.stock <= 10 ? ' bx-warn' : '')}>{p.stock}</td>
                   <td data-l="Status">{p.active ? <span className="bx-chip ok">Active</span> : <span className="bx-chip">Hidden</span>}{p.featured && <span className="bx-chip">Featured</span>}</td>
+                  <td className="r bx-row-actions"><Link to={`/admin/products/${p.id}`}>Edit</Link><button type="button" className="bx-danger" onClick={() => remove(p)}>Delete</button></td>
                 </tr>
               ))}
             </tbody>
