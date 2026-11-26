@@ -7,6 +7,7 @@ import { useSettings } from '../store/settings.jsx';
 const NAV = [
   ['/', 'Home'],
   ['/shop', 'Shop'],
+  ['/discount-cards', 'Discount Cards'],
   ['/about', 'About'],
   ['/contact', 'Contact'],
 ];
@@ -56,6 +57,7 @@ export default function SiteLayout() {
           </div>
           <nav aria-label="Footer">
             <Link to="/shop">Shop</Link>
+            <Link to="/discount-cards">Discount Cards</Link>
             <Link to="/about">About us</Link>
             <Link to="/contact">Contact</Link>
             <Link to={user ? '/account' : '/login'}>{user ? 'My account' : 'Log in'}</Link>

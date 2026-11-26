@@ -136,3 +136,19 @@
 .bx-fruit .bx-fruit-open{position:static;width:100%;height:100%;border-radius:8px;background:none;box-shadow:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .bx-fruit .bx-fruit-open:hover{background:rgba(255,255,255,.35)}
 .bx-fruit .bx-fruit-open canvas{max-width:100%;max-height:100%}
+/* Discount cards */
+.bx-stat-btn{font:inherit;color:inherit;text-align:left;cursor:pointer}
+.bx-pad{padding:16px 20px 4px}
+.bx-linkbtn{font:inherit;font-size:13px;font-weight:600;background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.bx-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;letter-spacing:.06em;background:#f4f0f8;border-radius:6px;padding:2px 6px;white-space:nowrap}
+.bx-num{width:84px;font:inherit;padding:6px 8px;border:1.5px solid #e4dcec;border-radius:10px}
+.bx-chip.bad{background:#fdeceb;color:var(--bad)}
+.bx-chip.warn{background:#fff3cd;color:#6b4e00}
+.bx-fb{font:inherit;font-size:13px;font-weight:600;border:1.5px solid #e4dcec;border-radius:999px;padding:4px 10px;background:#fff;color:var(--ink);cursor:pointer}
+.bx-fb-positive{background:#e3f4d6;border-color:#cfe8bd;color:var(--ok)}
+.bx-fb-negative{background:#fdeceb;border-color:#f2c7c4;color:var(--bad)}
+.bx-mt{margin-top:22px !important}
+.bx-mt-s{margin-top:12px !important}
+.bx-gift{margin-bottom:16px;border-color:var(--lilac);box-shadow:0 0 0 3px rgba(194,176,220,.35)}
+.bx-filter-note{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px}
+.bx-card-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:16px;max-width:820px}

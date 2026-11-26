@@ -41,6 +41,7 @@ export default function Account() {
         </div>
         <div className="b-actions-row">
           {isAdmin && <Link className="b-btn" to="/admin">Admin panel</Link>}
+          <Link className="b-btn b-btn-ghost" to="/discount-cards">My discount cards</Link>
           <button type="button" className="b-btn b-btn-ghost" onClick={async () => { await signOut(); flash('You are logged out'); }}>Log out</button>
         </div>
       </div>

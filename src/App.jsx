@@ -12,6 +12,7 @@ import Account from './pages/Account.jsx';
 import Auth from './pages/Auth.jsx';
 import About from './pages/About.jsx';
 import Contact from './pages/Contact.jsx';
+import DiscountCards from './pages/DiscountCards.jsx';
 import NotFound from './pages/NotFound.jsx';
 import { useAuth } from './store/auth.jsx';
 import { Navigate, useLocation } from 'react-router-dom';
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/reset-password" element={<Auth mode="reset" />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/discount-cards" element={<DiscountCards />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
