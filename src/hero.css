@@ -22,6 +22,8 @@ body{font-family:Poppins,system-ui,sans-serif;-webkit-font-smoothing:antialiased
 .pi-img{background:no-repeat center/contain}
 .bottle-img{background:no-repeat center bottom/contain;filter:drop-shadow(0 calc(18 * var(--u)) calc(22 * var(--u)) rgba(60,40,80,.18))}
 .piece{position:absolute}
+.pi-f{width:100%;height:100%}
+.bottle-sc{filter:drop-shadow(0 calc(18 * var(--u)) calc(22 * var(--u)) rgba(60,40,80,.18))}
 .piece.mir{transform:scaleX(-1)}
 .ly-corner .piece{filter:blur(calc(9 * var(--u)))}
 .pi{width:100%;height:100%;transform:rotate(var(--r));animation:bob var(--d) ease-in-out var(--dl) infinite alternate}

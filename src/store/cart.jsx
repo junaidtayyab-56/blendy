@@ -5,7 +5,7 @@ import { useAuth } from './auth.jsx';
 // Signed-in carts live in Supabase (cart_items). Guests keep a small cart in this
 // browser, which is moved into their account as soon as they log in.
 const KEY = 'blendy-guest-cart';
-const PRODUCT_FIELDS = 'id, slug, name, price_cents, compare_at_price_cents, currency, image_url, bg_color, stock, active, size_ml';
+const PRODUCT_FIELDS = 'id, slug, name, price_cents, compare_at_price_cents, currency, image_url, bg_color, bg_image_url, stock, active, size_ml';
 const CartCtx = createContext(null);
 
 const readGuest = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };

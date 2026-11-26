@@ -12,7 +12,7 @@ export default function Inventory() {
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const { data, error } = await supabase.from('products').select('id, slug, name, sku, stock, active, image_url, bg_color').order('stock').order('name');
+    const { data, error } = await supabase.from('products').select('id, slug, name, sku, stock, active, image_url, bg_color, bg_image_url').order('stock').order('name');
     if (error) console.error(error);
     setRows(data || []); setDraft({});
   }

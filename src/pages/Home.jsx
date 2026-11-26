@@ -11,8 +11,11 @@ import usePageTitle from '../components/usePageTitle.js';
 // admin; the four original flavours keep their hand-made art, other products use their photo.
 const MAX_SLIDES = 6;
 const ORIGINAL = F.map((f) => ({ ...f, slug: f.name.toLowerCase() }));
+const hasScene = (p) => p.scene && p.scene.v === 1 && Array.isArray(p.scene.layers);
 const toSlide = (p) => {
   const art = F.find((f) => f.name.toLowerCase() === p.slug);
+  // A slide edited in the admin image editor carries its own layers and background.
+  if (hasScene(p)) return { ...(art || {}), name: art ? art.name : p.name, slug: p.slug, bg: p.scene.background?.color || p.bg_color || art?.bg || '#C2B0DC', scene: p.scene };
   return art ? { ...art, slug: p.slug } : { name: p.name, slug: p.slug, bg: p.bg_color || '#C2B0DC', image: p.image_url, fruits: (p.hero_fruits && p.hero_fruits.length ? p.hero_fruits : (p.hero_fruit_url ? [p.hero_fruit_url] : [])) };
 };
 
@@ -23,7 +26,7 @@ function useHomeSlides() {
     const finish = (l) => { if (!done) { done = true; setList(l && l.length ? l : ORIGINAL); } };
     const t = setTimeout(() => finish(ORIGINAL), 2500);
     if (!supabase) finish(ORIGINAL);
-    else supabase.from('products').select('slug, name, bg_color, image_url, hero_fruit_url, hero_fruits')
+    else supabase.from('products').select('slug, name, bg_color, image_url, hero_fruit_url, hero_fruits, scene')
       .eq('active', true).eq('show_on_home', true).order('sort_order').order('name').limit(MAX_SLIDES)
       .then(({ data, error }) => { if (error) console.error(error); finish((data || []).map(toSlide)); }, () => finish(ORIGINAL));
     return () => { done = true; clearTimeout(t); };
