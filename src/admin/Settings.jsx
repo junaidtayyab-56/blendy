@@ -23,7 +23,7 @@ export default function Settings() {
     });
   }, []);
 
-  if (!form) return <div className="ad-loading">Loading…</div>;
+  if (!form) return <div className="bx-loading">Loading…</div>;
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   async function save(e) {
@@ -44,17 +44,17 @@ export default function Settings() {
 
   return (
     <form onSubmit={save}>
-      <div className="ad-head"><h1>Website settings</h1><button className="b-btn" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save settings'}</button></div>
-      <div className="ad-grid2">
-        <section className="ad-card">
+      <div className="bx-head"><h1>Website settings</h1><button className="b-btn" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save settings'}</button></div>
+      <div className="bx-grid2">
+        <section className="bx-card">
           <h2>Store</h2>
           <label className="b-field"><span>Store name</span><input required value={form.store_name} onChange={set('store_name')} maxLength={60} /></label>
           <label className="b-field"><span>Tagline</span><input value={form.tagline} onChange={set('tagline')} maxLength={120} /></label>
           <label className="b-field"><span>Announcement bar (leave empty to hide)</span><input value={form.announcement} onChange={set('announcement')} maxLength={160} placeholder="Free delivery this weekend!" /></label>
           <label className="b-field"><span>About us text</span><textarea rows={7} value={form.about} onChange={set('about')} maxLength={4000} placeholder="Shown on the About page. Leave empty for the default text." /></label>
         </section>
-        <div className="ad-stack">
-          <section className="ad-card">
+        <div className="bx-stack">
+          <section className="bx-card">
             <h2>Checkout</h2>
             <div className="b-form-grid">
               <label className="b-field"><span>Currency</span><select value={form.currency} onChange={set('currency')}>{CURRENCIES.map((c) => <option key={c}>{c}</option>)}</select></label>
@@ -63,7 +63,7 @@ export default function Settings() {
             </div>
             <p className="b-muted b-small">Payment method: cash on delivery. Changing the currency doesn't convert product prices.</p>
           </section>
-          <section className="ad-card">
+          <section className="bx-card">
             <h2>Contact and social</h2>
             <div className="b-form-grid">
               <label className="b-field"><span>Email</span><input type="email" value={form.contact_email} onChange={set('contact_email')} /></label>

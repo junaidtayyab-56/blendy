@@ -42,14 +42,14 @@ export default function Categories() {
   }
 
   const formEl = (
-    <form className="ad-card ad-inline-form" onSubmit={save}>
+    <form className="bx-card bx-inline-form" onSubmit={save}>
       <h2>{edit === 'new' ? 'New category' : 'Edit category'}</h2>
       <div className="b-form-grid">
         <label className="b-field"><span>Name</span><input required autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: edit === 'new' ? slugify(e.target.value) : form.slug })} /></label>
         <label className="b-field"><span>Slug</span><input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></label>
         <label className="b-field b-span2"><span>Description</span><input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
         <label className="b-field"><span>Sort order</span><input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></label>
-        <label className="b-check ad-check-mid"><input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} /> Visible in store</label>
+        <label className="b-check bx-check-mid"><input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} /> Visible in store</label>
       </div>
       <div className="b-actions-row"><button className="b-btn" disabled={busy}>Save</button><button type="button" className="b-btn b-btn-ghost" onClick={() => setEdit(null)}>Cancel</button></div>
     </form>
@@ -57,11 +57,11 @@ export default function Categories() {
 
   return (
     <div>
-      <div className="ad-head"><h1>Categories</h1>{edit === null && <button className="b-btn" type="button" onClick={() => start(null)}>+ Add category</button>}</div>
+      <div className="bx-head"><h1>Categories</h1>{edit === null && <button className="b-btn" type="button" onClick={() => start(null)}>+ Add category</button>}</div>
       {edit !== null && formEl}
-      <div className="ad-card ad-flush">
-        {cats === null ? <div className="ad-loading">Loading…</div> : cats.length === 0 ? <p className="ad-empty">No categories yet.</p> : (
-          <table className="ad-table ad-table-stack">
+      <div className="bx-card bx-flush">
+        {cats === null ? <div className="bx-loading">Loading…</div> : cats.length === 0 ? <p className="bx-empty">No categories yet.</p> : (
+          <table className="bx-table bx-table-stack">
             <thead><tr><th>Name</th><th>Slug</th><th className="r">Products</th><th>Status</th><th></th></tr></thead>
             <tbody>
               {cats.map((c) => (
@@ -69,8 +69,8 @@ export default function Categories() {
                   <td data-l="Name"><strong>{c.name}</strong>{c.description && <><br /><small className="b-muted">{c.description}</small></>}</td>
                   <td data-l="Slug">{c.slug}</td>
                   <td data-l="Products" className="r">{c.products?.[0]?.count ?? 0}</td>
-                  <td data-l="Status">{c.active ? <span className="ad-chip ok">Visible</span> : <span className="ad-chip">Hidden</span>}</td>
-                  <td className="r ad-row-actions"><button type="button" onClick={() => start(c)}>Edit</button><button type="button" className="ad-danger" onClick={() => remove(c)}>Delete</button></td>
+                  <td data-l="Status">{c.active ? <span className="bx-chip ok">Visible</span> : <span className="bx-chip">Hidden</span>}</td>
+                  <td className="r bx-row-actions"><button type="button" onClick={() => start(c)}>Edit</button><button type="button" className="bx-danger" onClick={() => remove(c)}>Delete</button></td>
                 </tr>
               ))}
             </tbody>

@@ -20,21 +20,21 @@ export default function Products() {
 
   return (
     <div>
-      <div className="ad-head"><h1>Products</h1><Link className="b-btn" to="/admin/products/new">+ Add product</Link></div>
-      <div className="ad-toolbar"><input className="ad-input" type="search" placeholder="Search name or SKU" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-      <div className="ad-card ad-flush">
-        {products === null ? <div className="ad-loading">Loading…</div> : shown.length === 0 ? <p className="ad-empty">No products yet.</p> : (
-          <table className="ad-table ad-table-stack">
+      <div className="bx-head"><h1>Products</h1><Link className="b-btn" to="/admin/products/new">+ Add product</Link></div>
+      <div className="bx-toolbar"><input className="bx-input" type="search" placeholder="Search name or SKU" value={q} onChange={(e) => setQ(e.target.value)} /></div>
+      <div className="bx-card bx-flush">
+        {products === null ? <div className="bx-loading">Loading…</div> : shown.length === 0 ? <p className="bx-empty">No products yet.</p> : (
+          <table className="bx-table bx-table-stack">
             <thead><tr><th></th><th>Product</th><th>Category</th><th className="r">Price</th><th className="r">Stock</th><th>Status</th></tr></thead>
             <tbody>
               {shown.map((p) => (
                 <tr key={p.id}>
-                  <td className="ad-thumb-cell"><ProductArt product={p} size="xs" /></td>
+                  <td className="bx-thumb-cell"><ProductArt product={p} size="xs" /></td>
                   <td data-l="Product"><Link to={`/admin/products/${p.id}`}><strong>{p.name}</strong></Link><br /><small className="b-muted">{p.sku || p.slug}</small></td>
                   <td data-l="Category">{p.category?.name || '—'}</td>
                   <td data-l="Price" className="r">{fmt(p.price_cents)}</td>
-                  <td data-l="Stock" className={'r' + (p.stock === 0 ? ' b-out' : p.stock <= 10 ? ' ad-warn' : '')}>{p.stock}</td>
-                  <td data-l="Status">{p.active ? <span className="ad-chip ok">Active</span> : <span className="ad-chip">Hidden</span>}{p.featured && <span className="ad-chip">Featured</span>}</td>
+                  <td data-l="Stock" className={'r' + (p.stock === 0 ? ' b-out' : p.stock <= 10 ? ' bx-warn' : '')}>{p.stock}</td>
+                  <td data-l="Status">{p.active ? <span className="bx-chip ok">Active</span> : <span className="bx-chip">Hidden</span>}{p.featured && <span className="bx-chip">Featured</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -73,7 +73,7 @@ export function ProductForm() {
     }
   }, [id, isNew]);
 
-  if (!form) return error ? <p className="b-error">{error}</p> : <div className="ad-loading">Loading…</div>;
+  if (!form) return error ? <p className="b-error">{error}</p> : <div className="bx-loading">Loading…</div>;
 
   const set = (k) => (e) => {
     const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -134,17 +134,17 @@ export function ProductForm() {
 
   return (
     <form onSubmit={save}>
-      <div className="ad-head">
-        <div><Link to="/admin/products" className="ad-back">← Products</Link><h1>{isNew ? 'New product' : form.name || 'Product'}</h1></div>
+      <div className="bx-head">
+        <div><Link to="/admin/products" className="bx-back">← Products</Link><h1>{isNew ? 'New product' : form.name || 'Product'}</h1></div>
         <div className="b-actions-row">
           {!isNew && <a className="b-btn b-btn-ghost" href={`/product/${form.slug}`} target="_blank" rel="noreferrer">View</a>}
           <button className="b-btn" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save'}</button>
         </div>
       </div>
       {error && <p className="b-error" role="alert">{error}</p>}
-      <div className="ad-grid2 ad-grid-wide">
-        <div className="ad-stack">
-          <section className="ad-card">
+      <div className="bx-grid2 bx-grid-wide">
+        <div className="bx-stack">
+          <section className="bx-card">
             <h2>Details</h2>
             <div className="b-form-grid">
               <label className="b-field"><span>Name</span><input required value={form.name} onChange={set('name')} maxLength={120} /></label>
@@ -157,7 +157,7 @@ export function ProductForm() {
               <label className="b-field"><span>Size (ml)</span><input type="number" min="1" value={form.size_ml} onChange={set('size_ml')} /></label>
             </div>
           </section>
-          <section className="ad-card">
+          <section className="bx-card">
             <h2>Pricing and inventory</h2>
             <div className="b-form-grid">
               <label className="b-field"><span>Price</span><input required inputMode="decimal" value={form.price} onChange={set('price')} placeholder="4.99" /></label>
@@ -167,18 +167,18 @@ export function ProductForm() {
             </div>
           </section>
         </div>
-        <div className="ad-stack">
-          <section className="ad-card">
+        <div className="bx-stack">
+          <section className="bx-card">
             <h2>Image</h2>
             <ProductArt product={preview} size="md" />
-            <label className="b-btn b-btn-ghost b-btn-block ad-upload">
+            <label className="b-btn b-btn-ghost b-btn-block bx-upload">
               {uploading ? 'Uploading…' : 'Upload image'}
               <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" onChange={upload} disabled={uploading} hidden />
             </label>
             <label className="b-field"><span>Image URL</span><input value={form.image_url} onChange={set('image_url')} placeholder="Leave empty to use the Blendy bottle art" /></label>
             <label className="b-field"><span>Background colour</span><input type="color" value={form.bg_color || '#C2B0DC'} onChange={set('bg_color')} /></label>
           </section>
-          <section className="ad-card">
+          <section className="bx-card">
             <h2>Visibility</h2>
             <label className="b-check"><input type="checkbox" checked={form.active} onChange={set('active')} /> Show in store</label>
             <label className="b-check"><input type="checkbox" checked={form.featured} onChange={set('featured')} /> Featured</label>

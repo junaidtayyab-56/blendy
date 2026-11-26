@@ -34,11 +34,11 @@ export default function Customers() {
 
   return (
     <div>
-      <div className="ad-head"><h1>Customers</h1><span className="b-muted">{rows ? `${rows.length} accounts` : ''}</span></div>
-      <div className="ad-toolbar"><input className="ad-input" type="search" placeholder="Search name, email or phone" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-      <div className="ad-card ad-flush">
-        {rows === null ? <div className="ad-loading">Loading…</div> : shown.length === 0 ? <p className="ad-empty">No customers yet.</p> : (
-          <table className="ad-table ad-table-stack">
+      <div className="bx-head"><h1>Customers</h1><span className="b-muted">{rows ? `${rows.length} accounts` : ''}</span></div>
+      <div className="bx-toolbar"><input className="bx-input" type="search" placeholder="Search name, email or phone" value={q} onChange={(e) => setQ(e.target.value)} /></div>
+      <div className="bx-card bx-flush">
+        {rows === null ? <div className="bx-loading">Loading…</div> : shown.length === 0 ? <p className="bx-empty">No customers yet.</p> : (
+          <table className="bx-table bx-table-stack">
             <thead><tr><th>Customer</th><th>Phone</th><th>Joined</th><th className="r">Orders</th><th className="r">Spent</th><th>Role</th><th></th></tr></thead>
             <tbody>
               {shown.map((r) => (
@@ -48,8 +48,8 @@ export default function Customers() {
                   <td data-l="Joined">{fmtDate(r.created_at)}</td>
                   <td data-l="Orders" className="r">{r.orders_count}</td>
                   <td data-l="Spent" className="r">{fmt(r.total_spent_cents)}</td>
-                  <td data-l="Role">{r.role === 'admin' ? <span className="ad-chip ok">Admin</span> : <span className="ad-chip">Customer</span>}</td>
-                  <td className="r ad-row-actions">{r.id !== user.id && <button type="button" onClick={() => toggleAdmin(r)}>{r.role === 'admin' ? 'Remove admin' : 'Make admin'}</button>}</td>
+                  <td data-l="Role">{r.role === 'admin' ? <span className="bx-chip ok">Admin</span> : <span className="bx-chip">Customer</span>}</td>
+                  <td className="r bx-row-actions">{r.id !== user.id && <button type="button" onClick={() => toggleAdmin(r)}>{r.role === 'admin' ? 'Remove admin' : 'Make admin'}</button>}</td>
                 </tr>
               ))}
             </tbody>

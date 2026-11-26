@@ -30,19 +30,19 @@ export default function AdminApp() {
   useEffect(() => { setOpen(false); }, [loc.pathname]);
   useEffect(() => { document.title = 'Admin | Blendy'; }, [loc.pathname]);
 
-  if (!ready) return <div className="ad-center">Loading…</div>;
+  if (!ready) return <div className="bx-center">Loading…</div>;
   if (!user) {
     return (
       <Routes>
-        <Route path="login" element={<div className="ad-login"><Auth mode="login" admin /></div>} />
+        <Route path="login" element={<div className="bx-login"><Auth mode="login" admin /></div>} />
         <Route path="*" element={<Navigate to={`/admin/login?next=${encodeURIComponent(loc.pathname)}`} replace />} />
       </Routes>
     );
   }
   if (!isAdmin) {
     return (
-      <div className="ad-center">
-        <div className="b-panel ad-denied">
+      <div className="bx-center">
+        <div className="b-panel bx-denied">
           <h1>No admin access</h1>
           <p className="b-muted">You're signed in as {user.email}, which is a customer account. Ask the store owner to give this account the admin role.</p>
           <div className="b-actions-row"><a className="b-btn" href="/">Back to the store</a><button className="b-btn b-btn-ghost" type="button" onClick={signOut}>Log out</button></div>
@@ -52,9 +52,9 @@ export default function AdminApp() {
   }
 
   return (
-    <div className="ad">
-      <aside className={'ad-side' + (open ? ' open' : '')}>
-        <div className="ad-brand"><span className="b-logo">Blendy</span><span className="ad-pill">Admin</span></div>
+    <div className="bx">
+      <aside className={'bx-side' + (open ? ' open' : '')}>
+        <div className="bx-brand"><span className="b-logo">Blendy</span><span className="bx-pill">Admin</span></div>
         <nav>
           {NAV.map(([to, label, d]) => (
             <NavLink key={to} to={`/admin${to ? '/' + to : ''}`} end={!to}>
@@ -62,19 +62,19 @@ export default function AdminApp() {
             </NavLink>
           ))}
         </nav>
-        <div className="ad-side-foot">
+        <div className="bx-side-foot">
           <a href="/" target="_blank" rel="noreferrer">View store ↗</a>
-          <span className="ad-me">{profile?.full_name || user.email}</span>
+          <span className="bx-me">{profile?.full_name || user.email}</span>
           <button type="button" onClick={signOut}>Log out</button>
         </div>
       </aside>
-      {open && <div className="ad-scrim" onClick={() => setOpen(false)} />}
-      <div className="ad-main">
-        <header className="ad-top">
-          <button type="button" className="b-burger ad-burger" aria-label="Menu" onClick={() => setOpen(true)}><span /><span /><span /></button>
-          <span className="b-logo ad-top-logo">Blendy admin</span>
+      {open && <div className="bx-scrim" onClick={() => setOpen(false)} />}
+      <div className="bx-main">
+        <header className="bx-top">
+          <button type="button" className="b-burger bx-burger" aria-label="Menu" onClick={() => setOpen(true)}><span /><span /><span /></button>
+          <span className="b-logo bx-top-logo">Blendy admin</span>
         </header>
-        <div className="ad-body">
+        <div className="bx-body">
           <Routes>
             <Route index element={<Dashboard />} />
             <Route path="login" element={<Navigate to="/admin" replace />} />

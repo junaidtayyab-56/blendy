@@ -34,28 +34,28 @@ export default function Messages() {
 
   return (
     <div>
-      <div className="ad-head"><h1>Messages</h1></div>
-      <div className="ad-toolbar"><div className="b-chips">
+      <div className="bx-head"><h1>Messages</h1></div>
+      <div className="bx-toolbar"><div className="b-chips">
         <button type="button" aria-selected={filter === 'inbox'} onClick={() => setFilter('inbox')}>Inbox</button>
         <button type="button" aria-selected={filter === 'archived'} onClick={() => setFilter('archived')}>Archived</button>
       </div></div>
-      <div className="ad-card ad-flush">
-        {rows === null ? <div className="ad-loading">Loading…</div> : shown.length === 0 ? <p className="ad-empty">No messages.</p> : (
-          <ul className="ad-msgs">
+      <div className="bx-card bx-flush">
+        {rows === null ? <div className="bx-loading">Loading…</div> : shown.length === 0 ? <p className="bx-empty">No messages.</p> : (
+          <ul className="bx-msgs">
             {shown.map((m) => (
               <li key={m.id} className={m.status === 'new' ? 'new' : ''}>
-                <button type="button" className="ad-msg-head" onClick={() => open(m)} aria-expanded={openId === m.id}>
+                <button type="button" className="bx-msg-head" onClick={() => open(m)} aria-expanded={openId === m.id}>
                   <span><strong>{m.name}</strong> <span className="b-muted">{m.email}</span></span>
-                  <span className="ad-msg-sub">{m.subject || m.message.slice(0, 80)}</span>
+                  <span className="bx-msg-sub">{m.subject || m.message.slice(0, 80)}</span>
                   <small className="b-muted">{fmtDateTime(m.created_at)}</small>
                 </button>
                 {openId === m.id && (
-                  <div className="ad-msg-body">
+                  <div className="bx-msg-body">
                     <p>{m.message}</p>
-                    <div className="ad-row-actions">
+                    <div className="bx-row-actions">
                       <a href={`mailto:${m.email}?subject=${encodeURIComponent('Re: ' + (m.subject || 'Your message to Blendy'))}`}>Reply by email</a>
                       {m.status !== 'archived' ? <button type="button" onClick={() => setStatus(m, 'archived')}>Archive</button> : <button type="button" onClick={() => setStatus(m, 'read')}>Move to inbox</button>}
-                      <button type="button" className="ad-danger" onClick={() => remove(m)}>Delete</button>
+                      <button type="button" className="bx-danger" onClick={() => remove(m)}>Delete</button>
                     </div>
                   </div>
                 )}

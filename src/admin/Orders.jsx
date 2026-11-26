@@ -26,17 +26,17 @@ export default function Orders() {
 
   return (
     <div>
-      <div className="ad-head"><h1>Orders</h1></div>
-      <div className="ad-toolbar">
+      <div className="bx-head"><h1>Orders</h1></div>
+      <div className="bx-toolbar">
         <div className="b-chips">
           <button type="button" aria-selected={!status} onClick={() => setParams({})}>All</button>
           {STATUSES.map((s) => <button type="button" key={s} aria-selected={status === s} onClick={() => setParams({ status: s })}>{s}</button>)}
         </div>
-        <input className="ad-input" type="search" placeholder="Search order #, name or email" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className="bx-input" type="search" placeholder="Search order #, name or email" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
-      <div className="ad-card ad-flush">
-        {orders === null ? <div className="ad-loading">Loading…</div> : shown.length === 0 ? <p className="ad-empty">No orders found.</p> : (
-          <table className="ad-table ad-table-stack">
+      <div className="bx-card bx-flush">
+        {orders === null ? <div className="bx-loading">Loading…</div> : shown.length === 0 ? <p className="bx-empty">No orders found.</p> : (
+          <table className="bx-table bx-table-stack">
             <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Items</th><th>Status</th><th className="r">Total</th></tr></thead>
             <tbody>
               {shown.map((o) => (
@@ -81,21 +81,21 @@ export function AdminOrder() {
     if (error) flash(error.message); else { flash('Order updated'); load(); }
   }
 
-  if (order === undefined) return <div className="ad-loading">Loading…</div>;
+  if (order === undefined) return <div className="bx-loading">Loading…</div>;
   if (!order) return <p>Order not found. <Link to="/admin/orders">Back to orders</Link></p>;
   const fmt = (c) => money(c, order.currency);
   const locked = order.status === 'cancelled';
 
   return (
     <div>
-      <div className="ad-head">
-        <div><Link to="/admin/orders" className="ad-back">← Orders</Link><h1>Order #{order.order_number}</h1><span className="b-muted">{fmtDateTime(order.created_at)}</span></div>
+      <div className="bx-head">
+        <div><Link to="/admin/orders" className="bx-back">← Orders</Link><h1>Order #{order.order_number}</h1><span className="b-muted">{fmtDateTime(order.created_at)}</span></div>
         <StatusBadge status={order.status} />
       </div>
-      <div className="ad-grid2 ad-grid-wide">
-        <section className="ad-card">
+      <div className="bx-grid2 bx-grid-wide">
+        <section className="bx-card">
           <h2>Items</h2>
-          <table className="ad-table">
+          <table className="bx-table">
             <thead><tr><th>Product</th><th className="r">Price</th><th className="r">Qty</th><th className="r">Total</th></tr></thead>
             <tbody>
               {order.items.map((i) => (
@@ -108,12 +108,12 @@ export function AdminOrder() {
             <tfoot>
               <tr><td colSpan={3}>Subtotal</td><td className="r">{fmt(order.subtotal_cents || order.total_cents)}</td></tr>
               <tr><td colSpan={3}>Shipping</td><td className="r">{fmt(order.shipping_cents)}</td></tr>
-              <tr className="ad-tot"><td colSpan={3}>Total (cash on delivery)</td><td className="r">{fmt(order.total_cents)}</td></tr>
+              <tr className="bx-tot"><td colSpan={3}>Total (cash on delivery)</td><td className="r">{fmt(order.total_cents)}</td></tr>
             </tfoot>
           </table>
         </section>
-        <div className="ad-stack">
-          <section className="ad-card">
+        <div className="bx-stack">
+          <section className="bx-card">
             <h2>Update order</h2>
             <label className="b-field"><span>Status</span>
               <select value={status} onChange={(e) => setStatus(e.target.value)} disabled={locked}>
@@ -124,7 +124,7 @@ export function AdminOrder() {
             <button type="button" className="b-btn b-btn-block" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save changes'}</button>
             {locked && <p className="b-muted b-small">Cancelled orders are closed. Stock was returned.</p>}
           </section>
-          <section className="ad-card">
+          <section className="bx-card">
             <h2>Customer</h2>
             <p>{order.shipping_name}<br /><a href={`mailto:${order.email}`}>{order.email}</a><br /><a href={`tel:${order.shipping_phone}`}>{order.shipping_phone}</a></p>
             <h3>Delivery address</h3>

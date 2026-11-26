@@ -38,29 +38,29 @@ export default function Inventory() {
 
   return (
     <div>
-      <div className="ad-head"><h1>Inventory</h1><button className="b-btn" type="button" disabled={!changed.length || busy} onClick={saveAll}>{busy ? 'Saving…' : changed.length ? `Save ${changed.length} change${changed.length > 1 ? 's' : ''}` : 'No changes'}</button></div>
-      <div className="ad-toolbar">
+      <div className="bx-head"><h1>Inventory</h1><button className="b-btn" type="button" disabled={!changed.length || busy} onClick={saveAll}>{busy ? 'Saving…' : changed.length ? `Save ${changed.length} change${changed.length > 1 ? 's' : ''}` : 'No changes'}</button></div>
+      <div className="bx-toolbar">
         <div className="b-chips">
           {[['all', 'All'], ['low', 'Low stock (1–10)'], ['out', 'Out of stock']].map(([k, l]) => <button type="button" key={k} aria-selected={filter === k} onClick={() => setFilter(k)}>{l}</button>)}
         </div>
       </div>
-      <div className="ad-card ad-flush">
-        {rows === null ? <div className="ad-loading">Loading…</div> : shown.length === 0 ? <p className="ad-empty">Nothing here.</p> : (
-          <table className="ad-table ad-table-stack">
+      <div className="bx-card bx-flush">
+        {rows === null ? <div className="bx-loading">Loading…</div> : shown.length === 0 ? <p className="bx-empty">Nothing here.</p> : (
+          <table className="bx-table bx-table-stack">
             <thead><tr><th></th><th>Product</th><th>SKU</th><th>In stock</th><th>Adjust</th></tr></thead>
             <tbody>
               {shown.map((r) => (
-                <tr key={r.id} className={draft[r.id] !== undefined && draft[r.id] !== r.stock ? 'ad-dirty' : ''}>
-                  <td className="ad-thumb-cell"><ProductArt product={r} size="xs" /></td>
-                  <td data-l="Product"><Link to={`/admin/products/${r.id}`}>{r.name}</Link>{!r.active && <span className="ad-chip">Hidden</span>}</td>
+                <tr key={r.id} className={draft[r.id] !== undefined && draft[r.id] !== r.stock ? 'bx-dirty' : ''}>
+                  <td className="bx-thumb-cell"><ProductArt product={r} size="xs" /></td>
+                  <td data-l="Product"><Link to={`/admin/products/${r.id}`}>{r.name}</Link>{!r.active && <span className="bx-chip">Hidden</span>}</td>
                   <td data-l="SKU">{r.sku || '—'}</td>
-                  <td data-l="In stock" className={r.stock === 0 ? 'b-out' : r.stock <= 10 ? 'ad-warn' : ''}>{r.stock}</td>
+                  <td data-l="In stock" className={r.stock === 0 ? 'b-out' : r.stock <= 10 ? 'bx-warn' : ''}>{r.stock}</td>
                   <td data-l="Adjust">
-                    <div className="ad-adjust">
+                    <div className="bx-adjust">
                       <button type="button" onClick={() => setVal(r, Math.max(0, val(r) - 1))} aria-label="Remove one">−</button>
                       <input type="number" min="0" value={val(r)} onChange={(e) => setVal(r, e.target.value === '' ? 0 : parseInt(e.target.value, 10))} aria-label={`Stock for ${r.name}`} />
                       <button type="button" onClick={() => setVal(r, val(r) + 1)} aria-label="Add one">+</button>
-                      <button type="button" className="ad-plus10" onClick={() => setVal(r, val(r) + 10)}>+10</button>
+                      <button type="button" className="bx-plus10" onClick={() => setVal(r, val(r) + 10)}>+10</button>
                     </div>
                   </td>
                 </tr>

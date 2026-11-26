@@ -32,7 +32,7 @@ export default function App() {
       <RecoveryRedirect />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/admin/*" element={<Suspense fallback={<div className="ad-center">Loading…</div>}><AdminApp /></Suspense>} />
+        <Route path="/admin/*" element={<Suspense fallback={<div className="bx-center">Loading…</div>}><AdminApp /></Suspense>} />
         <Route element={<SiteLayout />}>
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:slug" element={<Product />} />
