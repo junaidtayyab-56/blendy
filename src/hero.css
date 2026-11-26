@@ -19,6 +19,7 @@ body{font-family:Poppins,system-ui,sans-serif;-webkit-font-smoothing:antialiased
 .shd{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(60,40,80,0.22),transparent);filter:blur(calc(4 * var(--u)))}
 .crop{background-image:var(--sheet);background-repeat:no-repeat}
 .bottle{position:absolute}
+.pi-img{background:no-repeat center/contain}
 .bottle-img{background:no-repeat center bottom/contain;filter:drop-shadow(0 calc(18 * var(--u)) calc(22 * var(--u)) rgba(60,40,80,.18))}
 .piece{position:absolute}
 .piece.mir{transform:scaleX(-1)}

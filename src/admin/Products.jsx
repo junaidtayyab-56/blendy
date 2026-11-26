@@ -57,7 +57,7 @@ export default function Products() {
 
 const HERO_ART = ['berry', 'kiwi', 'banana', 'strawberry'];
 
-const EMPTY = { name: '', slug: '', description: '', ingredients: '', category_id: '', price: '', compare: '', stock: '0', sku: '', size_ml: '', bg_color: '#C2B0DC', image_url: '', featured: false, show_on_home: false, active: true, sort_order: '0' };
+const EMPTY = { name: '', slug: '', description: '', ingredients: '', category_id: '', price: '', compare: '', stock: '0', sku: '', size_ml: '', bg_color: '#C2B0DC', image_url: '', featured: false, show_on_home: false, hero_fruit_url: '', active: true, sort_order: '0' };
 
 export function ProductForm() {
   const { id } = useParams();
@@ -79,7 +79,7 @@ export function ProductForm() {
         setForm({
           ...data, category_id: data.category_id || '', price: centsToInput(data.price_cents), compare: centsToInput(data.compare_at_price_cents),
           stock: String(data.stock), size_ml: data.size_ml ?? '', sku: data.sku || '', description: data.description || '', ingredients: data.ingredients || '',
-          bg_color: data.bg_color || '#C2B0DC', image_url: data.image_url || '', sort_order: String(data.sort_order ?? 0),
+          bg_color: data.bg_color || '#C2B0DC', image_url: data.image_url || '', hero_fruit_url: data.hero_fruit_url || '', sort_order: String(data.sort_order ?? 0),
         });
       });
     }
@@ -92,7 +92,7 @@ export function ProductForm() {
     setForm((f) => ({ ...f, [k]: v, ...(k === 'name' && !slugTouched ? { slug: slugify(v) } : {}) }));
   };
 
-  async function upload(e) {
+  async function upload(e, field = 'image_url') {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { flash('Images must be under 5 MB'); return; }
@@ -103,7 +103,7 @@ export function ProductForm() {
     setUploading(false);
     if (error) { flash(error.message); return; }
     const { data } = supabase.storage.from('product-images').getPublicUrl(path);
-    setForm((f) => ({ ...f, image_url: data.publicUrl }));
+    setForm((f) => ({ ...f, [field]: data.publicUrl }));
     flash('Image uploaded. Save the product to keep it.');
   }
 
@@ -122,7 +122,7 @@ export function ProductForm() {
       name: form.name.trim(), slug: slugify(form.slug), description: form.description.trim() || null, ingredients: form.ingredients.trim() || null,
       category_id: form.category_id || null, price_cents: price, compare_at_price_cents: compare, stock, sku: form.sku.trim() || null,
       size_ml: form.size_ml === '' ? null : parseInt(form.size_ml, 10), bg_color: form.bg_color || null, image_url: form.image_url.trim() || null,
-      featured: form.featured, show_on_home: form.show_on_home, active: form.active, sort_order: parseInt(form.sort_order, 10) || 0,
+      featured: form.featured, show_on_home: form.show_on_home, hero_fruit_url: form.hero_fruit_url.trim() || null, active: form.active, sort_order: parseInt(form.sort_order, 10) || 0,
     };
     setBusy(true);
     const { data, error } = isNew ? await supabase.from('products').insert(row).select('id').single() : await supabase.from('products').update(row).eq('id', id).select('id').single();
@@ -190,6 +190,18 @@ export function ProductForm() {
             <label className="b-field"><span>Image URL</span><input value={form.image_url} onChange={set('image_url')} placeholder="Leave empty to use the Blendy bottle art" /></label>
             <label className="b-field"><span>Background colour</span><input type="color" value={form.bg_color || '#C2B0DC'} onChange={set('bg_color')} /></label>
           </section>
+          {!HERO_ART.includes(form.slug) && (
+            <section className="bx-card">
+              <h2>Homepage fruit image</h2>
+              <p className="b-muted bx-hint">Optional. A fruit picture that floats around the bottle in the homepage slider, like the original smoothies. A PNG with a transparent background looks best.</p>
+              {form.hero_fruit_url && <div className="bx-fruit-prev" style={{ background: form.bg_color || '#C2B0DC' }}><img src={form.hero_fruit_url} alt="" /></div>}
+              <label className="b-btn b-btn-ghost b-btn-block bx-upload">
+                {uploading ? 'Uploading…' : form.hero_fruit_url ? 'Change fruit image' : 'Upload fruit image'}
+                <input type="file" accept="image/png,image/webp,image/gif,image/avif,image/jpeg" onChange={(e) => upload(e, 'hero_fruit_url')} disabled={uploading} hidden />
+              </label>
+              {form.hero_fruit_url && <button type="button" className="bx-link-btn" onClick={() => setForm((f) => ({ ...f, hero_fruit_url: '' }))}>Remove fruit image</button>}
+            </section>
+          )}
           <section className="bx-card">
             <h2>Visibility</h2>
             <label className="b-check"><input type="checkbox" checked={form.active} onChange={set('active')} /> Show in store</label>

@@ -4,6 +4,9 @@ import { F, SHADOWS, LAYERS, FACT, COV_T, COV_C, DUR, EASE, sheetUrl, fallbackSh
 
 // `list` holds the slides: the original flavours (with sheet art) and/or products with
 // just an image, background colour and name.
+// Spots for an admin-added product's fruit picture: [x, y, size, rotation, mirror, layer].
+const GENERIC_PIECES = [[380, 170, 140, -12, 0, 'f'], [960, 228, 150, 8, 1, 'f'], [300, 470, 165, 0, 0, 'f'], [1190, 460, 150, -20, 0, 'f'], [950, 600, 145, 12, 1, 'f'], [-10, 575, 255, 0, 0, 'c'], [1285, 30, 200, 15, 0, 'c']];
+
 export function startHero({ list = F, stage, tabsEl, ul, prevBtn, nextBtn, isPaused, onChange }) {
   const n = list.length;
   const root = document.documentElement;
@@ -55,6 +58,20 @@ export function startHero({ list = F, stage, tabsEl, ul, prevBtn, nextBtn, isPau
       b.style.left = U(500); b.style.top = U(125); b.style.width = U(440); b.style.height = U(590);
       b.style.backgroundImage = `url("${String(f.image).replace(/"/g, '%22')}")`;
       L.bottle.appendChild(b);
+    }
+    // Products added in the admin can give one fruit picture; it floats in the same kind of spots.
+    if (!f.items && f.fruit) {
+      for (const [x, y, w, rot, mir, lay] of GENERIC_PIECES) {
+        const o = document.createElement('div'); o.className = 'piece' + (mir ? ' mir' : '');
+        o.style.left = U(x); o.style.top = U(y); o.style.width = U(w); o.style.height = U(w);
+        const inner = document.createElement('div'); inner.className = 'pi pi-img';
+        inner.style.backgroundImage = `url("${String(f.fruit).replace(/"/g, '%22')}")`;
+        inner.style.setProperty('--r', rot + 'deg');
+        inner.style.setProperty('--d', rand(3.2, 5).toFixed(2) + 's');
+        inner.style.setProperty('--dl', (-rand(0, 4)).toFixed(2) + 's');
+        o.appendChild(inner);
+        (lay === 'c' ? L.corner : L.fruit).appendChild(o);
+      }
     }
     for (const [it, x, y, w, rot, mir, lay] of (f.pieces || [])) {
       const o = document.createElement('div'); o.className = 'piece' + (mir ? ' mir' : '');

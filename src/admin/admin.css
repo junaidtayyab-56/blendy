@@ -129,3 +129,6 @@
 @media (max-width:520px){.bx-stats{grid-template-columns:1fr 1fr;gap:10px}.bx-stat strong{font-size:22px}.bx-stat{padding:14px}}
 .bx-tip{background:#fff3cd;color:#6b4e00;border-radius:10px;padding:8px 12px;font-size:13px;margin:4px 0 8px}
 .bx-hint{font-size:12px;margin:0 0 10px}
+.bx-fruit-prev{border-radius:12px;padding:14px;display:flex;justify-content:center;margin:0 0 10px}
+.bx-fruit-prev img{max-width:120px;max-height:120px;object-fit:contain}
+.bx-link-btn{background:none;border:0;padding:8px 0 0;font:inherit;font-size:13px;font-weight:600;color:var(--bad);text-decoration:underline;cursor:pointer}
