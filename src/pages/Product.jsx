@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../supabase.js';
 import ProductArt from '../components/ProductArt.jsx';
 import ProductCard from '../components/ProductCard.jsx';
@@ -19,6 +19,7 @@ export default function Product() {
   const { add } = useCart();
   const { fmt } = useSettings();
   const flash = useToast();
+  const navigate = useNavigate();
   usePageTitle(product?.name || 'Product');
 
   useEffect(() => {
@@ -80,7 +81,8 @@ export default function Product() {
           </dl>
           <div className="b-buy">
             <Qty value={qty} onChange={setQty} max={max} disabled={out} />
-            <button type="button" className="b-btn" disabled={busy || out} onClick={onAdd}>{out ? 'Sold out' : busy ? 'Adding…' : 'Add to cart'}</button>
+            <button type="button" className={out ? 'b-btn' : 'b-btn b-btn-ghost'} disabled={busy || out} onClick={onAdd}>{out ? 'Sold out' : busy ? 'Adding…' : 'Add to cart'}</button>
+            {!out && <button type="button" className="b-btn" onClick={() => navigate(`/checkout?buy=${encodeURIComponent(product.slug)}&qty=${qty}`)}>Buy now</button>}
           </div>
           <Link to="/cart" className="b-link">View cart</Link>
         </div>

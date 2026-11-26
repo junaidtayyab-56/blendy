@@ -43,7 +43,7 @@ export default function Products() {
                   <td data-l="Category">{p.category?.name || '—'}</td>
                   <td data-l="Price" className="r">{fmt(p.price_cents)}</td>
                   <td data-l="Stock" className={'r' + (p.stock === 0 ? ' b-out' : p.stock <= 10 ? ' bx-warn' : '')}>{p.stock}</td>
-                  <td data-l="Status">{p.active ? <span className="bx-chip ok">Active</span> : <span className="bx-chip">Hidden</span>}{p.featured && <span className="bx-chip">Featured</span>}</td>
+                  <td data-l="Status">{p.active ? <span className="bx-chip ok">Active</span> : <span className="bx-chip">Hidden</span>}{p.show_on_home && <span className="bx-chip">Homepage</span>}{p.featured && <span className="bx-chip">Featured</span>}</td>
                   <td className="r bx-row-actions"><Link to={`/admin/products/${p.id}`}>Edit</Link><button type="button" className="bx-danger" onClick={() => remove(p)}>Delete</button></td>
                 </tr>
               ))}
@@ -55,7 +55,9 @@ export default function Products() {
   );
 }
 
-const EMPTY = { name: '', slug: '', description: '', ingredients: '', category_id: '', price: '', compare: '', stock: '0', sku: '', size_ml: '', bg_color: '#C2B0DC', image_url: '', featured: false, active: true, sort_order: '0' };
+const HERO_ART = ['berry', 'kiwi', 'banana', 'strawberry'];
+
+const EMPTY = { name: '', slug: '', description: '', ingredients: '', category_id: '', price: '', compare: '', stock: '0', sku: '', size_ml: '', bg_color: '#C2B0DC', image_url: '', featured: false, show_on_home: false, active: true, sort_order: '0' };
 
 export function ProductForm() {
   const { id } = useParams();
@@ -120,7 +122,7 @@ export function ProductForm() {
       name: form.name.trim(), slug: slugify(form.slug), description: form.description.trim() || null, ingredients: form.ingredients.trim() || null,
       category_id: form.category_id || null, price_cents: price, compare_at_price_cents: compare, stock, sku: form.sku.trim() || null,
       size_ml: form.size_ml === '' ? null : parseInt(form.size_ml, 10), bg_color: form.bg_color || null, image_url: form.image_url.trim() || null,
-      featured: form.featured, active: form.active, sort_order: parseInt(form.sort_order, 10) || 0,
+      featured: form.featured, show_on_home: form.show_on_home, active: form.active, sort_order: parseInt(form.sort_order, 10) || 0,
     };
     setBusy(true);
     const { data, error } = isNew ? await supabase.from('products').insert(row).select('id').single() : await supabase.from('products').update(row).eq('id', id).select('id').single();
@@ -191,6 +193,9 @@ export function ProductForm() {
           <section className="bx-card">
             <h2>Visibility</h2>
             <label className="b-check"><input type="checkbox" checked={form.active} onChange={set('active')} /> Show in store</label>
+            <label className="b-check"><input type="checkbox" checked={form.show_on_home} onChange={set('show_on_home')} /> Show on homepage slider</label>
+            {form.show_on_home && !form.image_url && !HERO_ART.includes(form.slug) && <p className="bx-tip">Add an image above so this product has a picture in the homepage slider.</p>}
+            <p className="b-muted bx-hint">The slider shows up to 6 products, in sort order.</p>
             <label className="b-check"><input type="checkbox" checked={form.featured} onChange={set('featured')} /> Featured</label>
             <label className="b-field"><span>Sort order</span><input type="number" value={form.sort_order} onChange={set('sort_order')} /></label>
           </section>

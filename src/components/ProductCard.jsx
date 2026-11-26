@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ProductArt from './ProductArt.jsx';
 import { useCart } from '../store/cart.jsx';
 import { useSettings } from '../store/settings.jsx';
@@ -10,6 +10,7 @@ export default function ProductCard({ product }) {
   const { fmt } = useSettings();
   const flash = useToast();
   const [busy, setBusy] = useState(false);
+  const navigate = useNavigate();
   const out = product.stock <= 0;
 
   async function onAdd() {
@@ -35,9 +36,14 @@ export default function ProductCard({ product }) {
           <strong>{fmt(product.price_cents)}</strong>
         </div>
       </div>
-      <button type="button" className="b-btn b-btn-block" disabled={busy || out} onClick={onAdd}>
-        {out ? 'Sold out' : busy ? 'Adding…' : 'Add to cart'}
-      </button>
+      {out ? (
+        <button type="button" className="b-btn b-btn-block" disabled>Sold out</button>
+      ) : (
+        <div className="b-card-actions">
+          <button type="button" className="b-btn b-btn-ghost" disabled={busy} onClick={onAdd}>{busy ? 'Adding…' : 'Add to cart'}</button>
+          <button type="button" className="b-btn" onClick={() => navigate(`/checkout?buy=${encodeURIComponent(product.slug)}`)}>Buy now</button>
+        </div>
+      )}
     </article>
   );
 }

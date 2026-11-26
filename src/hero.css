@@ -19,6 +19,7 @@ body{font-family:Poppins,system-ui,sans-serif;-webkit-font-smoothing:antialiased
 .shd{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(60,40,80,0.22),transparent);filter:blur(calc(4 * var(--u)))}
 .crop{background-image:var(--sheet);background-repeat:no-repeat}
 .bottle{position:absolute}
+.bottle-img{background:no-repeat center bottom/contain;filter:drop-shadow(0 calc(18 * var(--u)) calc(22 * var(--u)) rgba(60,40,80,.18))}
 .piece{position:absolute}
 .piece.mir{transform:scaleX(-1)}
 .ly-corner .piece{filter:blur(calc(9 * var(--u)))}
@@ -35,6 +36,7 @@ body{font-family:Poppins,system-ui,sans-serif;-webkit-font-smoothing:antialiased
 .logo{font-family:'Baloo 2',Poppins,system-ui,sans-serif;font-weight:800;font-size:calc(51 * var(--n));letter-spacing:-0.02em;line-height:1}
 .tabs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;gap:calc(88 * var(--n));font-weight:500;font-size:calc(21 * var(--n))}
 .tabs button{padding:calc(6 * var(--n)) 0}
+.tabs.many{gap:calc(56 * var(--n))}
 .ul{position:absolute;left:0;top:calc(100% + 2 * var(--n));height:2px;width:0;border-radius:2px;background:#fff;box-shadow:0 1px 6px rgba(90,70,40,0.18);transition:transform .6s cubic-bezier(0.65,0,0.35,1),width .6s cubic-bezier(0.65,0,0.35,1)}
 .acct{margin-left:auto;display:flex;align-items:center;gap:calc(22 * var(--n));font-weight:500;font-size:calc(21 * var(--n))}
 .sep{opacity:.9}
@@ -55,6 +57,7 @@ body{font-family:Poppins,system-ui,sans-serif;-webkit-font-smoothing:antialiased
   .logo{font-size:34px}
   .acct{font-size:15px;gap:10px}
   .tabs{top:36px;transform:translateX(-50%);gap:22px;font-size:15px}
+  .tabs.many{gap:16px;max-width:calc(100vw - 32px);overflow-x:auto;scrollbar-width:none}
   .shop{font-size:15px;bottom:22px}
   .arrow{width:48px;height:48px;bottom:12px}
   .prev{left:8px}.next{right:8px}

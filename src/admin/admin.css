@@ -127,3 +127,5 @@
   .bx-msg-head{grid-template-columns:1fr;gap:2px}
 }
 @media (max-width:520px){.bx-stats{grid-template-columns:1fr 1fr;gap:10px}.bx-stat strong{font-size:22px}.bx-stat{padding:14px}}
+.bx-tip{background:#fff3cd;color:#6b4e00;border-radius:10px;padding:8px 12px;font-size:13px;margin:4px 0 8px}
+.bx-hint{font-size:12px;margin:0 0 10px}

@@ -2,7 +2,10 @@
 // animation code, wrapped so React can mount it once and tear it down cleanly.
 import { F, SHADOWS, LAYERS, FACT, COV_T, COV_C, DUR, EASE, sheetUrl, fallbackSheet } from './flavours.js';
 
-export function startHero({ stage, tabsEl, ul, prevBtn, nextBtn, isPaused, onChange }) {
+// `list` holds the slides: the original flavours (with sheet art) and/or products with
+// just an image, background colour and name.
+export function startHero({ list = F, stage, tabsEl, ul, prevBtn, nextBtn, isPaused, onChange }) {
+  const n = list.length;
   const root = document.documentElement;
   const body = document.body;
   const tabBtns = [...tabsEl.querySelectorAll('button')];
@@ -28,12 +31,12 @@ export function startHero({ stage, tabsEl, ul, prevBtn, nextBtn, isPaused, onCha
 
   // build slides
   stage.textContent = '';
-  const slides = F.map((f, i) => {
+  const slides = list.map((f, i) => {
     const sec = document.createElement('section');
     sec.className = 'slide' + (i === 0 ? ' is-current' : '');
     sec.style.background = f.bg;
     sec.setAttribute('aria-label', f.name + ' smoothie');
-    sec.style.setProperty('--sheet', `url("${sheetUrl(f)}")`);
+    if (f.items) sec.style.setProperty('--sheet', `url("${sheetUrl(f)}")`);
     const frame = document.createElement('div'); frame.className = 'frame'; sec.appendChild(frame);
     const L = {};
     for (const n of LAYERS) { const d = document.createElement('div'); d.className = 'layer ly-' + n; frame.appendChild(d); L[n] = d; }
@@ -44,8 +47,16 @@ export function startHero({ stage, tabsEl, ul, prevBtn, nextBtn, isPaused, onCha
       L.shadow.appendChild(s);
     }
     const b = document.createElement('div'); b.className = 'bottle'; b.setAttribute('role', 'img'); b.setAttribute('aria-label', f.name + ' smoothie bottle');
-    b.style.left = U(f.bottle[0]); b.style.top = U(f.bottle[1]); crop(b, f.items[0], f.bottle[2]); L.bottle.appendChild(b);
-    for (const [it, x, y, w, rot, mir, lay] of f.pieces) {
+    if (f.items) {
+      b.style.left = U(f.bottle[0]); b.style.top = U(f.bottle[1]); crop(b, f.items[0], f.bottle[2]); L.bottle.appendChild(b);
+    } else if (f.image) {
+      // A product added in the admin: its photo stands where the bottle would be.
+      b.classList.add('bottle-img');
+      b.style.left = U(500); b.style.top = U(125); b.style.width = U(440); b.style.height = U(590);
+      b.style.backgroundImage = `url("${String(f.image).replace(/"/g, '%22')}")`;
+      L.bottle.appendChild(b);
+    }
+    for (const [it, x, y, w, rot, mir, lay] of (f.pieces || [])) {
       const o = document.createElement('div'); o.className = 'piece' + (mir ? ' mir' : '');
       o.style.left = U(x); o.style.top = U(y);
       const inner = document.createElement('div'); inner.className = 'pi';
@@ -63,7 +74,8 @@ export function startHero({ stage, tabsEl, ul, prevBtn, nextBtn, isPaused, onCha
   });
 
   // sheet loading; if the proxy is unreachable, draw a stand-in sheet
-  F.forEach((f, i) => {
+  list.forEach((f, i) => {
+    if (!f.items) return;
     const img = new Image();
     img.onerror = () => { if (alive) slides[i].el.style.setProperty('--sheet', `url("${fallbackSheet(f)}")`); };
     img.src = sheetUrl(f);
@@ -143,8 +155,8 @@ export function startHero({ stage, tabsEl, ul, prevBtn, nextBtn, isPaused, onCha
     };
     requestAnimationFrame(step);
   }
-  const next = () => go((cur + 1) % 4, 1);
-  const prev = () => go((cur + 3) % 4, -1);
+  const next = () => go((cur + 1) % n, 1);
+  const prev = () => go((cur + n - 1) % n, -1);
   const act = () => { lastAct = performance.now(); };
 
   tabBtns.forEach((b, i) => on(b, 'click', () => { act(); if (i !== cur) go(i, i > cur ? 1 : -1); }));
