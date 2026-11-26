@@ -4,7 +4,7 @@ import { supabase } from '../supabase.js';
 import ProductCard from '../components/ProductCard.jsx';
 import usePageTitle from '../components/usePageTitle.js';
 
-export const PRODUCT_LIST_FIELDS = 'id, slug, name, description, price_cents, compare_at_price_cents, currency, image_url, bg_color, stock, featured, size_ml, sort_order, created_at, category:categories(id, name, slug)';
+export const PRODUCT_LIST_FIELDS = 'id, slug, name, description, price_cents, compare_at_price_cents, currency, image_url, bg_color, bg_image_url, stock, featured, size_ml, sort_order, created_at, category:categories(id, name, slug)';
 
 const SORTS = {
   featured: (a, b) => (b.featured - a.featured) || (a.sort_order - b.sort_order),

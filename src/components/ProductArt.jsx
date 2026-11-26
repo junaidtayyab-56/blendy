@@ -56,5 +56,8 @@ export default function ProductArt({ product, className = '', size = 'md' }) {
   } else {
     inner = <span className="b-art-initial" aria-hidden="true">{(product?.name || '?').slice(0, 1)}</span>;
   }
-  return <div className={`b-art b-art-${size} ${className}`} style={{ background: bg }}>{inner}</div>;
+  const style = product?.bg_image_url
+    ? { backgroundColor: bg, backgroundImage: `url("${String(product.bg_image_url).replace(/"/g, '%22')}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: bg };
+  return <div className={`b-art b-art-${size} ${className}`} style={style}>{inner}</div>;
 }

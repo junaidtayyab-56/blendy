@@ -5,6 +5,8 @@ import ProductArt from '../components/ProductArt.jsx';
 import { useToast } from '../store/toast.jsx';
 import { useSettings } from '../store/settings.jsx';
 import { centsToInput, inputToCents, slugify } from './util.js';
+import ImageEditor, { LayerCanvas } from '../editor/ImageEditor.jsx';
+import { DEFAULT_EDIT, GENERIC_BOTTLE, GENERIC_PIECES, MAX_FRUIT_LAYERS, bottleOf, defaultScene, flavourFor, fruitsOf, newId, productColumnsFromScene, sceneFor } from '../editor/scene.js';
 
 export default function Products() {
   const [products, setProducts] = useState(null);
@@ -56,9 +58,20 @@ export default function Products() {
 }
 
 const HERO_ART = ['berry', 'kiwi', 'banana', 'strawberry'];
-const MAX_FRUITS = 4;
 
-const EMPTY = { name: '', slug: '', description: '', ingredients: '', category_id: '', price: '', compare: '', stock: '0', sku: '', size_ml: '', bg_color: '#C2B0DC', image_url: '', featured: false, show_on_home: false, hero_fruits: [], active: true, sort_order: '0' };
+// Put a new product photo in the slide's bottle spot (or bring back the original art).
+function withBottle(scene, url, slug) {
+  const rest = scene.layers.filter((l) => l.kind !== 'bottle');
+  const old = bottleOf(scene);
+  if (!url) {
+    const art = flavourFor(slug) ? bottleOf(defaultScene({ slug })) : null;
+    return { ...scene, layers: art ? [art, ...rest] : rest };
+  }
+  const [x, y, w, h] = old && old.source?.url ? [old.x, old.y, old.w, old.h] : GENERIC_BOTTLE;
+  return { ...scene, layers: [{ id: newId('b'), kind: 'bottle', depth: 'f', source: { url }, cut: null, src: null, edit: { ...DEFAULT_EDIT }, x, y, w, h, rot: old?.rot || 0, fit: 'bottom' }, ...rest] };
+}
+
+const EMPTY = { name: '', slug: '', description: '', ingredients: '', category_id: '', price: '', compare: '', stock: '0', sku: '', size_ml: '', bg_color: '#C2B0DC', image_url: '', featured: false, show_on_home: false, hero_fruits: [], bg_image_url: '', scene: null, active: true, sort_order: '0' };
 
 export function ProductForm() {
   const { id } = useParams();
@@ -71,6 +84,7 @@ export function ProductForm() {
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [editing, setEditing] = useState(null); // which layer the image editor opens on
 
   useEffect(() => {
     supabase.from('categories').select('id, name').order('sort_order').then(({ data }) => setCats(data || []));
@@ -80,18 +94,51 @@ export function ProductForm() {
         setForm({
           ...data, category_id: data.category_id || '', price: centsToInput(data.price_cents), compare: centsToInput(data.compare_at_price_cents),
           stock: String(data.stock), size_ml: data.size_ml ?? '', sku: data.sku || '', description: data.description || '', ingredients: data.ingredients || '',
-          bg_color: data.bg_color || '#C2B0DC', image_url: data.image_url || '', hero_fruits: (data.hero_fruits && data.hero_fruits.length ? data.hero_fruits : (data.hero_fruit_url ? [data.hero_fruit_url] : [])), sort_order: String(data.sort_order ?? 0),
+          bg_color: data.bg_color || '#C2B0DC', image_url: data.image_url || '', hero_fruits: (data.hero_fruits && data.hero_fruits.length ? data.hero_fruits : (data.hero_fruit_url ? [data.hero_fruit_url] : [])), sort_order: String(data.sort_order ?? 0), bg_image_url: data.bg_image_url || '', scene: data.scene || null,
         });
       });
     }
   }, [id, isNew]);
 
+  // The slide as saved, or as it looks today (built once so layer ids stay stable).
+  const scene = useMemo(() => (form ? sceneFor(form) : null), [form?.scene, form?.slug, form?.image_url, form?.bg_color, form?.hero_fruits]); // eslint-disable-line react-hooks/exhaustive-deps
+  const fruits = scene ? fruitsOf(scene) : [];
+
   if (!form) return error ? <p className="b-error">{error}</p> : <div className="bx-loading">Loading…</div>;
 
   const set = (k) => (e) => {
     const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setForm((f) => ({ ...f, [k]: v, ...(k === 'name' && !slugTouched ? { slug: slugify(v) } : {}) }));
+    setForm((f) => ({
+      ...f, [k]: v, ...(k === 'name' && !slugTouched ? { slug: slugify(v) } : {}),
+      ...(k === 'bg_color' && f.scene ? { scene: { ...f.scene, background: { ...f.scene.background, color: v } } } : {}),
+    }));
   };
+  // A typed image URL replaces the slide's product image too (once the field is left).
+  const syncImageUrl = () => setForm((f) => {
+    if (!f.scene) return f;
+    const b = bottleOf(f.scene);
+    const cur = b ? (b.src || b.source?.url || '') : '';
+    return cur === f.image_url.trim() ? f : { ...f, scene: withBottle(f.scene, f.image_url.trim(), f.slug) };
+  });
+
+  async function storageUpload(blob, kind = 'image', ext = 'png') {
+    const path = `edits/${slugify(form.slug || form.name || 'product')}/${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+    const { error } = await supabase.storage.from('product-images').upload(path, blob, { cacheControl: '31536000', contentType: blob.type || `image/${ext}` });
+    if (error) throw error;
+    return supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+  }
+
+  // Saved from the image editor: store right away for an existing product.
+  async function saveScene(scene) {
+    const cols = productColumnsFromScene(scene, form);
+    if (!isNew) {
+      const { error } = await supabase.from('products').update({ scene, ...cols }).eq('id', id);
+      if (error) throw error;
+    }
+    setForm((f) => ({ ...f, scene, image_url: cols.image_url || '', bg_color: cols.bg_color, bg_image_url: cols.bg_image_url || '', hero_fruits: cols.hero_fruits }));
+    setEditing(null);
+    flash(isNew ? 'Image changes ready. Save the product to keep them.' : 'Image changes saved');
+  }
 
   async function upload(e, field = 'image_url') {
     const file = e.target.files?.[0];
@@ -104,7 +151,17 @@ export function ProductForm() {
     setUploading(false);
     if (error) { flash(error.message); return; }
     const { data } = supabase.storage.from('product-images').getPublicUrl(path);
-    setForm((f) => (field === 'hero_fruits' ? { ...f, hero_fruits: [...f.hero_fruits, data.publicUrl].slice(0, MAX_FRUITS) } : { ...f, [field]: data.publicUrl }));
+    const url = data.publicUrl;
+    setForm((f) => {
+      if (field === 'hero_fruits') {
+        const sc = f.scene || sceneFor(f);
+        const n = fruitsOf(sc).length;
+        const [x, y, w, rot, , lay] = GENERIC_PIECES[n % GENERIC_PIECES.length];
+        const fruit = { id: newId('f'), kind: 'fruit', depth: lay, source: { url }, cut: null, src: null, edit: { ...DEFAULT_EDIT }, x: x + (n >= GENERIC_PIECES.length ? 40 : 0), y, w, h: w, rot, fit: 'center' };
+        return { ...f, scene: { ...sc, layers: [...sc.layers, fruit] } };
+      }
+      return { ...f, [field]: url, ...(field === 'image_url' && f.scene ? { scene: withBottle(f.scene, url, f.slug) } : {}) };
+    });
     e.target.value = '';
     flash('Image uploaded. Save the product to keep it.');
   }
@@ -124,7 +181,8 @@ export function ProductForm() {
       name: form.name.trim(), slug: slugify(form.slug), description: form.description.trim() || null, ingredients: form.ingredients.trim() || null,
       category_id: form.category_id || null, price_cents: price, compare_at_price_cents: compare, stock, sku: form.sku.trim() || null,
       size_ml: form.size_ml === '' ? null : parseInt(form.size_ml, 10), bg_color: form.bg_color || null, image_url: form.image_url.trim() || null,
-      featured: form.featured, show_on_home: form.show_on_home, hero_fruits: form.hero_fruits.slice(0, MAX_FRUITS), hero_fruit_url: form.hero_fruits[0] || null, active: form.active, sort_order: parseInt(form.sort_order, 10) || 0,
+      featured: form.featured, show_on_home: form.show_on_home, hero_fruits: form.hero_fruits.slice(0, 4), hero_fruit_url: form.hero_fruits[0] || null, bg_image_url: form.bg_image_url || null, active: form.active, sort_order: parseInt(form.sort_order, 10) || 0,
+      ...(form.scene ? { scene: form.scene, ...productColumnsFromScene(form.scene, form) } : {}),
     };
     setBusy(true);
     const { data, error } = isNew ? await supabase.from('products').insert(row).select('id').single() : await supabase.from('products').update(row).eq('id', id).select('id').single();
@@ -185,35 +243,38 @@ export function ProductForm() {
           <section className="bx-card">
             <h2>Image</h2>
             <ProductArt product={preview} size="md" />
+            <button type="button" className="b-btn b-btn-block bx-upload" onClick={() => setEditing('bottle')}>Edit image</button>
             <label className="b-btn b-btn-ghost b-btn-block bx-upload">
               {uploading ? 'Uploading…' : 'Upload image'}
               <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" onChange={upload} disabled={uploading} hidden />
             </label>
-            <label className="b-field"><span>Image URL</span><input value={form.image_url} onChange={set('image_url')} placeholder="Leave empty to use the Blendy bottle art" /></label>
+            <label className="b-field"><span>Image URL</span><input value={form.image_url} onChange={set('image_url')} onBlur={syncImageUrl} placeholder="Leave empty to use the Blendy bottle art" /></label>
             <label className="b-field"><span>Background colour</span><input type="color" value={form.bg_color || '#C2B0DC'} onChange={set('bg_color')} /></label>
           </section>
-          {!HERO_ART.includes(form.slug) && (
-            <section className="bx-card">
-              <h2>Homepage fruit pictures</h2>
-              <p className="b-muted bx-hint">Optional. Up to {MAX_FRUITS} different fruit pictures that float around the bottle in the homepage slider, like the original smoothies. PNGs with a transparent background look best.</p>
-              {form.hero_fruits.length > 0 && (
-                <div className="bx-fruits" style={{ background: form.bg_color || '#C2B0DC' }}>
-                  {form.hero_fruits.map((url, i) => (
-                    <div key={url + i} className="bx-fruit">
-                      <img src={url} alt={`Fruit picture ${i + 1}`} />
-                      <button type="button" aria-label={`Remove fruit picture ${i + 1}`} onClick={() => setForm((f) => ({ ...f, hero_fruits: f.hero_fruits.filter((_, j) => j !== i) }))}>×</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {form.hero_fruits.length < MAX_FRUITS && (
-                <label className="b-btn b-btn-ghost b-btn-block bx-upload">
-                  {uploading ? 'Uploading…' : form.hero_fruits.length ? 'Add another fruit picture' : 'Upload fruit picture'}
+          <section className="bx-card">
+            <h2>Homepage fruit pictures</h2>
+            <p className="b-muted bx-hint">The fruit that floats around the bottle in the homepage slider. Each picture is its own layer: open it to remove its background, change its shape, size, position, rotation and colours.</p>
+            {fruits.length > 0 && (
+              <div className="bx-fruits" style={{ background: form.bg_color || '#C2B0DC' }}>
+                {fruits.map((l, i) => (
+                  <div key={l.id} className="bx-fruit">
+                    <button type="button" className="bx-fruit-open" aria-label={`Edit fruit picture ${i + 1}`} title="Edit image" onClick={() => setEditing(l.id)}><LayerCanvas layer={l} maxSide={160} /></button>
+                    <button type="button" aria-label={`Remove fruit picture ${i + 1}`} onClick={() => setForm((f) => { const sc = f.scene || sceneFor(f); return { ...f, scene: { ...sc, layers: sc.layers.filter((x) => x.id !== l.id) } }; })}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="b-actions-row">
+              {fruits.length > 0 && <button type="button" className="b-btn b-btn-ghost" onClick={() => setEditing(fruits[0].id)}>Edit fruit images</button>}
+              {fruits.length < MAX_FRUIT_LAYERS && (
+                <label className="b-btn b-btn-ghost bx-upload">
+                  {uploading ? 'Uploading…' : fruits.length ? 'Add fruit picture' : 'Upload fruit picture'}
                   <input type="file" accept="image/png,image/webp,image/gif,image/avif,image/jpeg" onChange={(e) => upload(e, 'hero_fruits')} disabled={uploading} hidden />
                 </label>
               )}
-            </section>
-          )}
+            </div>
+            {form.scene && <p className="b-muted bx-hint">Remember to press Save to keep added or removed pictures.</p>}
+          </section>
           <section className="bx-card">
             <h2>Visibility</h2>
             <label className="b-check"><input type="checkbox" checked={form.active} onChange={set('active')} /> Show in store</label>
@@ -226,6 +287,9 @@ export function ProductForm() {
           {!isNew && <button type="button" className="b-btn b-btn-danger b-btn-block" onClick={remove} disabled={busy}>Delete product</button>}
         </div>
       </div>
+      {editing && (
+        <ImageEditor product={{ ...form, scene }} scene={scene} select={editing} upload={storageUpload} onSave={saveScene} onCancel={() => setEditing(null)} />
+      )}
     </form>
   );
 }

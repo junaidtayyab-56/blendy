@@ -1,6 +1,7 @@
 // Imperative slide engine for the Blendy hero. It is the original vanilla
 // animation code, wrapped so React can mount it once and tear it down cleanly.
 import { F, SHADOWS, LAYERS, FACT, COV_T, COV_C, DUR, EASE, sheetUrl, fallbackSheet } from './flavours.js';
+import { layerDisplay } from './editor/scene.js';
 
 // `list` holds the slides: the original flavours (with sheet art) and/or products with
 // just an image, background colour and name.
@@ -32,12 +33,48 @@ export function startHero({ list = F, stage, tabsEl, ul, prevBtn, nextBtn, isPau
     el.style.backgroundPosition = U(-bx * s) + ' ' + U(-by * s);
   }
 
+  // One editor layer: the picture (sheet crop or image) inside a box placed in frame units.
+  // Fruit keeps the same gentle bob as the original pieces.
+  function addSceneLayer(l, L) {
+    const d = layerDisplay(l);
+    if (!d.url) return;
+    const pic = document.createElement('div'); pic.className = 'pi-f';
+    if (d.box) { crop(pic, d.box, l.w); pic.style.width = '100%'; pic.style.height = '100%'; }
+    else {
+      pic.classList.add('pi-img');
+      pic.style.backgroundImage = `url("${String(d.url).replace(/"/g, '%22')}")`;
+      if (l.fit === 'bottom') pic.style.backgroundPosition = 'center bottom';
+    }
+    const e = l.edit || {};
+    if (d.cssFlip && (e.flipX || e.flipY)) pic.style.transform = `scale(${e.flipX ? -1 : 1}, ${e.flipY ? -1 : 1})`;
+    const box = (el) => { el.style.left = U(l.x); el.style.top = U(l.y); el.style.width = U(l.w); el.style.height = U(l.h); };
+    if (l.kind === 'bottle') {
+      const b = document.createElement('div'); b.className = 'bottle' + (l.source?.url ? ' bottle-sc' : '');
+      b.setAttribute('role', 'img'); b.setAttribute('aria-label', 'Smoothie bottle');
+      box(b);
+      if (l.rot) b.style.transform = `rotate(${+l.rot}deg)`;
+      b.appendChild(pic); L.bottle.appendChild(b);
+      return;
+    }
+    const o = document.createElement('div'); o.className = 'piece'; box(o);
+    const inner = document.createElement('div'); inner.className = 'pi';
+    inner.style.setProperty('--r', (+l.rot || 0) + 'deg');
+    inner.style.setProperty('--d', rand(3.2, 5).toFixed(2) + 's');
+    inner.style.setProperty('--dl', (-rand(0, 4)).toFixed(2) + 's');
+    inner.appendChild(pic); o.appendChild(inner);
+    (l.depth === 'c' ? L.corner : L.fruit).appendChild(o);
+  }
+
   // build slides
   stage.textContent = '';
   const slides = list.map((f, i) => {
     const sec = document.createElement('section');
     sec.className = 'slide' + (i === 0 ? ' is-current' : '');
     sec.style.background = f.bg;
+    if (f.scene?.background?.image?.src) {
+      sec.style.backgroundImage = `url("${String(f.scene.background.image.src).replace(/"/g, '%22')}")`;
+      sec.style.backgroundSize = 'cover'; sec.style.backgroundPosition = 'center';
+    }
     sec.setAttribute('aria-label', f.name + ' smoothie');
     if (f.items) sec.style.setProperty('--sheet', `url("${sheetUrl(f)}")`);
     const frame = document.createElement('div'); frame.className = 'frame'; sec.appendChild(frame);
@@ -50,7 +87,10 @@ export function startHero({ list = F, stage, tabsEl, ul, prevBtn, nextBtn, isPau
       L.shadow.appendChild(s);
     }
     const b = document.createElement('div'); b.className = 'bottle'; b.setAttribute('role', 'img'); b.setAttribute('aria-label', f.name + ' smoothie bottle');
-    if (f.items) {
+    if (f.scene) {
+      // Saved from the admin image editor: every picture is its own layer.
+      for (const l of f.scene.layers) addSceneLayer(l, L);
+    } else if (f.items) {
       b.style.left = U(f.bottle[0]); b.style.top = U(f.bottle[1]); crop(b, f.items[0], f.bottle[2]); L.bottle.appendChild(b);
     } else if (f.image) {
       // A product added in the admin: its photo stands where the bottle would be.
@@ -60,7 +100,7 @@ export function startHero({ list = F, stage, tabsEl, ul, prevBtn, nextBtn, isPau
       L.bottle.appendChild(b);
     }
     // Products added in the admin can give up to 4 fruit pictures; they take turns in the same kind of spots.
-    if (!f.items && f.fruits && f.fruits.length) {
+    if (!f.scene && !f.items && f.fruits && f.fruits.length) {
       for (const [k, [x, y, w, rot, mir, lay]] of GENERIC_PIECES.entries()) {
         const fruit = f.fruits[k % f.fruits.length];
         const o = document.createElement('div'); o.className = 'piece' + (mir ? ' mir' : '');
@@ -74,7 +114,7 @@ export function startHero({ list = F, stage, tabsEl, ul, prevBtn, nextBtn, isPau
         (lay === 'c' ? L.corner : L.fruit).appendChild(o);
       }
     }
-    for (const [it, x, y, w, rot, mir, lay] of (f.pieces || [])) {
+    for (const [it, x, y, w, rot, mir, lay] of (f.scene ? [] : (f.pieces || []))) {
       const o = document.createElement('div'); o.className = 'piece' + (mir ? ' mir' : '');
       o.style.left = U(x); o.style.top = U(y);
       const inner = document.createElement('div'); inner.className = 'pi';
