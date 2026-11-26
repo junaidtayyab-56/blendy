@@ -5,8 +5,10 @@
 
 :root{--u:1px;--fy:0px;--n:clamp(0.5px, min(100vw / 1440, 100vh / 900), 1.3px);--ease:cubic-bezier(0.22,0.8,0.3,1)}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;overflow:hidden}
-body{background:#C2B0DC;color:#fff;font-family:Poppins,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;touch-action:pan-y}
+html,body{margin:0}
+html.is-home,html.is-home body{height:100%;overflow:hidden}
+html.is-home body{background:#C2B0DC;color:#fff;touch-action:pan-y}
+body{font-family:Poppins,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 .stage{position:fixed;inset:0;overflow:hidden;user-select:none;-webkit-user-select:none}
 .slide{position:absolute;inset:0;overflow:hidden;visibility:hidden;z-index:0}
