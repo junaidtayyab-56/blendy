@@ -14,7 +14,7 @@
 // or, instead of Gmail:
 //   RESEND_API_KEY      a Resend API key   (optional RESEND_FROM, e.g. "Blendy <orders@yourdomain.com>")
 // Optional: STORE_TIMEZONE (default Asia/Karachi), SITE_URL (default https://blendy-neon.vercel.app)
-// SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase automatically.
+// SUPABASE_URL and the server key (SUPABASE_SECRET_KEYS or SUPABASE_SERVICE_ROLE_KEY) are provided by Supabase.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import nodemailer from 'npm:nodemailer@6.9.16';
@@ -31,7 +31,17 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TZ = Deno.env.get('STORE_TIMEZONE') || 'Asia/Karachi';
 const SITE = (Deno.env.get('SITE_URL') || 'https://blendy-neon.vercel.app').replace(/\/$/, '');
 
-const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
+// Server key: the new-style secret key when the project has one, else the legacy service role key.
+function serverKey(): string {
+  try {
+    const keys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}');
+    const k = keys.default || Object.values(keys)[0];
+    if (typeof k === 'string' && k) return k;
+  } catch { /* not set */ }
+  return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+}
+
+const db = createClient(Deno.env.get('SUPABASE_URL')!, serverKey(), {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
