@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../store/auth.jsx';
 import { useCart } from '../store/cart.jsx';
 import { useSettings } from '../store/settings.jsx';
+import NotificationBell from './NotificationBell.jsx';
 
 const NAV = [
   ['/', 'Home'],
@@ -37,6 +38,7 @@ export default function SiteLayout() {
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>
               <span>{user ? 'Account' : 'Log in'}</span>
             </NavLink>
+            <NotificationBell />
             <NavLink to="/cart" className="b-icon-link b-cart-link" aria-label={`Cart, ${count} items`}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2" /><circle cx="10" cy="20.5" r="1.2" /><circle cx="17" cy="20.5" r="1.2" /></svg>
               <span>Cart</span>

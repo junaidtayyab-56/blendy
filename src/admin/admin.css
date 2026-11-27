@@ -152,3 +152,4 @@
 .bx-gift{margin-bottom:16px;border-color:var(--lilac);box-shadow:0 0 0 3px rgba(194,176,220,.35)}
 .bx-filter-note{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px}
 .bx-card-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:16px;max-width:820px}
+.bx-err-text{color:var(--bad)}
