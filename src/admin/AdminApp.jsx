@@ -10,6 +10,7 @@ import Inventory from './Inventory.jsx';
 import Customers from './Customers.jsx';
 import Rewards from './Rewards.jsx';
 import Messages from './Messages.jsx';
+import Notifications from './Notifications.jsx';
 import Settings from './Settings.jsx';
 import './admin.css';
 
@@ -21,6 +22,7 @@ const NAV = [
   ['inventory', 'Inventory', 'M3 3h18v4H3zM5 7v14h14V7M9 11h6'],
   ['customers', 'Customers', 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'],
   ['discount-cards', 'Discount cards', 'M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zM2 10h20M6 15h5'],
+  ['notifications', 'Notifications', 'M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0'],
   ['messages', 'Messages', 'M4 4h16v12H5.2L4 17.2zM4 4l8 7 8-7'],
   ['settings', 'Settings', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 10h.1a2 2 0 1 1 0 4z'],
 ];
@@ -89,6 +91,7 @@ export default function AdminApp() {
             <Route path="inventory" element={<Inventory />} />
             <Route path="customers" element={<Customers />} />
             <Route path="discount-cards" element={<Rewards />} />
+            <Route path="notifications" element={<Notifications />} />
             <Route path="messages" element={<Messages />} />
             <Route path="settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />

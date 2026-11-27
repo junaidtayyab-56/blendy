@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabase.js';
 import usePageTitle from '../components/usePageTitle.js';
 import DiscountCard, { CardStatus, fmtCardDate } from '../components/DiscountCard.jsx';
@@ -18,6 +18,8 @@ export default function DiscountCards() {
   const [milestones, setMilestones] = useState(null);
   const [mine, setMine] = useState(undefined);
   const [error, setError] = useState('');
+  const [params] = useSearchParams();
+  const focusCard = params.get('card'); // set when a customer opens a card notification
 
   useEffect(() => {
     if (!supabase) return;
@@ -30,7 +32,7 @@ export default function DiscountCards() {
     if (!ready) return;
     if (!user) { setMine(null); return; }
     supabase.rpc('my_rewards').then(({ data, error }) => { if (error) setError(error.message); setMine(data || null); });
-  }, [user, ready]);
+  }, [user, ready, focusCard]);
 
   const percent = rules?.discount_percent;
   const ms = milestones || [];
@@ -53,7 +55,7 @@ export default function DiscountCards() {
         {error && <p className="b-error" role="alert">{error}</p>}
 
         {!ready || (user && mine === undefined) ? <div className="b-loading">Loading…</div> : user ? (
-          mine && <Wallet data={mine} fmt={fmt} />
+          mine && <Wallet data={mine} fmt={fmt} focus={focusCard} />
         ) : (
           <section className="b-panel b-dc-guest">
             <div>
@@ -119,7 +121,13 @@ export default function DiscountCards() {
   );
 }
 
-function Wallet({ data, fmt }) {
+function Wallet({ data, fmt, focus }) {
+  // Scroll the card from a notification into view and pulse it.
+  useEffect(() => {
+    if (!focus) return;
+    const el = document.getElementById(`card-${focus}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [focus, data]);
   const cards = data.cards || [];
   const available = cards.filter((c) => c.status === 'available');
   const past = cards.filter((c) => c.status !== 'available');
@@ -160,7 +168,11 @@ function Wallet({ data, fmt }) {
         <div className="b-panel b-empty-s"><p className="b-muted">You don’t have any cards to use yet.</p><Link className="b-btn" to="/shop">Start an order</Link></div>
       ) : (
         <div className="b-dc-grid">
-          {available.map((c) => <DiscountCard key={c.id} card={c} percent={data.discount_percent} />)}
+          {available.map((c) => (
+            <div key={c.id} id={`card-${c.id}`} className={focus === c.id ? 'b-dc-focus' : undefined}>
+              <DiscountCard card={c} percent={data.discount_percent} selected={focus === c.id} />
+            </div>
+          ))}
         </div>
       )}
 
@@ -169,7 +181,7 @@ function Wallet({ data, fmt }) {
           <h2>Card history</h2>
           <ul>
             {past.map((c) => (
-              <li key={c.id}>
+              <li key={c.id} id={`card-${c.id}`} className={focus === c.id ? 'b-dc-focus' : undefined}>
                 <div className="b-dc-hist-main">
                   <span className="b-dc-code-sm">{c.code}</span>
                   <CardStatus status={c.status} />
